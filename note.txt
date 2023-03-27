@@ -1,0 +1,7 @@
+1920x900
+
+#chat gpt
+keep going from last part that i got
+
+
+pyinstaller --onefile --noconsole your_script_name.py
