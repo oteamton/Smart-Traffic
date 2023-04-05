@@ -6,12 +6,12 @@ CONFIDENCE_THRESHOLD = 0.2
 NMS_THRESHOLD = 0.4
 COLORS = [(0, 255, 255), (255, 255, 0), (0, 255, 0), (255, 0, 0)]
 
-with open("D:\Space\Python\yolo\classes.txt", "r") as f:
+with open("D:\project\yolo\classes.txt", "r") as f:
     class_names = [cname.strip() for cname in f.readlines()]
 
-cap = cv2.VideoCapture("D:\\Space\\Python\\video_traffic\\vid5.mp4")
+cap = cv2.VideoCapture("D:\\project\\video\\VIdeoForTest-20230328T031006Z-001\\VIdeoForTest\\vid3.mp4")
 start_time = time.time()
-net = cv2.dnn.readNet("D:\Space\Python\yolo\yolov4.weights", "D:\Space\Python\yolo\yolov4.cfg")
+net = cv2.dnn.readNet("D:\project\yolo\yolov4.weights", "D:\project\yolo\yolov4.cfg")
 net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
 net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
 
@@ -25,7 +25,6 @@ fps_time = 0
 distance2 = 500
 # Initialize counters for each object class
 motorcycle_count = 0
-
 while True:
     start = time.time()
     (grabbed, frame) = cap.read()
@@ -47,7 +46,7 @@ while True:
     vertices2 = np.array([[(0, line_position2), (frame.shape[1], line_position2),
                       (frame.shape[1], line_position3), (0, line_position3),
                       ]], dtype=np.int32)
-    # # create a mask with the same size as the frame
+    # create a mask with the same size as the frame
     # mask = np.zeros_like(frame)
     # # fill the polygon with a color of 50% opacity
     # alpha = 0  # Set the desired alpha value
@@ -64,7 +63,7 @@ while True:
         x, y, w, h = box
         center = (int(x + w / 2), int(y + h / 2))
         current_centers[classid] = center
-        
+        f_color = (255,255,255)
         if classid in previous_centers:
             distance = cv2.norm(current_centers[classid], previous_centers[classid], cv2.NORM_L2)
             time_elapsed = 1 / (1 / (time.time() - start))
@@ -75,16 +74,20 @@ while True:
             label = label + " Speed: %.2f km/h" % speed_in_km_per_hour
             # check if the object is within the RoI and if its speed exceeds 50 km/h
             if line_position1 <= previous_centers[classid][1] <= line_position2 and \
-            speed_in_km_per_hour > 70:
+            speed_in_km_per_hour > 40:
                 # easygui.msgbox("Speed Alert in zone 70 : %s km/h" % speed_in_km_per_hour)
-                cv2.putText(frame, "ALERT! Object speed > 70 km/h", (0, 55),
+                cv2.putText(frame, "ALERT! Object speed > 40 km/h", (0, 55),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            if line_position2 <= previous_centers[classid][1] <= line_position3 and \
-            speed_in_km_per_hour > 50:
-                # easygui.msgbox("Speed Alert in zone 50 : %s km/h" % speed_in_km_per_hour)
-                cv2.putText(frame, "ALERT! Object speed > 50 km/h", (0, 55),
-                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-
+                color = (0,0,255)
+                f_color = (0,0,0)
+            # if line_position2 <= previous_centers[classid][1] <= line_position3 and \
+            # speed_in_km_per_hour > 25:
+            #     # easygui.msgbox("Speed Alert in zone 50 : %s km/h" % speed_in_km_per_hour)
+            #     cv2.putText(frame, "ALERT! Object speed > 25 km/h", (0, 55),
+            #     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            #     color = (0,0,255)
+        
+        
         previous_centers[classid] = center
         cv2.rectangle(frame, box, color, 2)
         # Get label size
@@ -105,9 +108,9 @@ while True:
         cv2.rectangle(frame, (label_pos[0]-3, label_pos[1]-h_label-3), (label_pos[0]+w_label+3, label_pos[1]+3), color, cv2.FILLED)
         
         # Draw label
-        cv2.putText(frame, label, label_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 2)
+        cv2.putText(frame, label, label_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (f_color), 2)
 
-    # apply the mask to the frame
+    # # apply the mask to the frame
     # roi_frame = cv2.bitwise_and(frame, mask)
     fps = "FPS: %.2f " % (1 / (time.time() - start))
     cv2.putText(frame, fps, (0, 25), cv2.FONT_HERSHEY_TRIPLEX, 1, (0, 0, 0), 1)
