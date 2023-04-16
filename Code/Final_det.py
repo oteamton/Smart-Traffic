@@ -66,9 +66,7 @@ while True:
         center = (int(x + w / 2), int(y + h / 2))
         current_centers[classid] = center
         f_color = (255,255,255)
-        
-        # Draw bounding box and arrow
-        cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
+        # arrow 
         arrow_len = int(max(w, h) * 1.2)
         arrow_start = (int(x + w / 2), y - arrow_len)
         arrow_end = (center[0], center[1] - arrow_len)
@@ -90,12 +88,14 @@ while True:
                 color = (0,0,255)
                 color_a = (0,0,255)
                 f_color = (0,0,0)
-            if line_position2 <= previous_centers[classid][1] <= line_position3 and \
-            speed_in_km_per_hour > 30:
-                # easygui.msgbox("Speed Alert in zone 50 : %s km/h" % speed_in_km_per_hour)
-                cv2.putText(frame, "ALERT! Object speed > 25 km/h", (0, 55),
-                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-                color = (0,0,255)
+            # if line_position2 <= previous_centers[classid][1] <= line_position3 and \
+            # speed_in_km_per_hour > 30:
+            #     # easygui.msgbox("Speed Alert in zone 50 : %s km/h" % speed_in_km_per_hour)
+            #     cv2.putText(frame, "ALERT! Object speed > 25 km/h", (0, 55),
+            #     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            #     color = (255,255,255)
+            #     color_a = (0,255,255)
+            #     f_color = (1,1,1)
         
         cv2.arrowedLine(frame, arrow_start, arrow_end, (color_a), 4)
         previous_centers[classid] = center
