@@ -6,12 +6,12 @@ CONFIDENCE_THRESHOLD = 0.2
 NMS_THRESHOLD = 0.4
 COLORS = [(0, 255, 255), (255, 255, 0), (0, 255, 0), (255, 0, 0)]
 
-with open("D:\project\yolo\classes.txt", "r") as f:
+with open("D:\Space\Python\yolo\classes.txt", "r") as f:
     class_names = [cname.strip() for cname in f.readlines()]
 
-cap = cv2.VideoCapture("D:\\project\\video\\VIdeoForTest-20230328T031006Z-001\\VIdeoForTest\\vid3.mp4")
+cap = cv2.VideoCapture("D:\\Space\\Python\\video_traffic\\vid1.mp4")
 start_time = time.time()
-net = cv2.dnn.readNet("D:\project\yolo\yolov4.weights", "D:\project\yolo\yolov4.cfg")
+net = cv2.dnn.readNet("D:\Space\Python\yolo\yolov4.weights", "D:\Space\Python\yolo\yolov4.cfg")
 net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
 net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
 
@@ -25,6 +25,7 @@ fps_time = 0
 distance2 = 500
 # Initialize counters for each object class
 motorcycle_count = 0
+
 while True:
     start = time.time()
     (grabbed, frame) = cap.read()
@@ -47,22 +48,30 @@ while True:
                       (frame.shape[1], line_position3), (0, line_position3),
                       ]], dtype=np.int32)
     # create a mask with the same size as the frame
-    # mask = np.zeros_like(frame)
-    # # fill the polygon with a color of 50% opacity
-    # alpha = 0  # Set the desired alpha value
-    # cv2.fillPoly(mask, [vertices], (0, 255, 0, int(alpha * 0)))
-    # cv2.fillPoly(mask, [vertices2], (0, 0, 255, int(alpha * 0))) 
+    mask = np.zeros_like(frame)
+    # fill the polygon with a color of 50% opacity
+    alpha = 0  # Set the desired alpha value
+    cv2.fillPoly(mask, [vertices], (0, 255, 0, int(alpha * 0)))
+    cv2.fillPoly(mask, [vertices2], (0, 0, 255, int(alpha * 0))) 
     
     classes, scores, boxes = model.detect(frame, CONFIDENCE_THRESHOLD, NMS_THRESHOLD)
     for (classid, score, box) in zip(classes, scores, boxes):
         if class_names[classid] != "motorcycle":
             continue
+        color_a = (0,255,0)
         color = COLORS[int(classid) % len(COLORS)]
         label = "%s : %f" % (class_names[classid], score)
         
         x, y, w, h = box
         center = (int(x + w / 2), int(y + h / 2))
         current_centers[classid] = center
+        f_color = (255,255,255)
+        
+        # Draw bounding box and arrow
+        cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
+        arrow_len = int(max(w, h) * 1.2)
+        arrow_start = (int(x + w / 2), y - arrow_len)
+        arrow_end = (center[0], center[1] - arrow_len)
         f_color = (255,255,255)
         if classid in previous_centers:
             distance = cv2.norm(current_centers[classid], previous_centers[classid], cv2.NORM_L2)
@@ -79,15 +88,16 @@ while True:
                 cv2.putText(frame, "ALERT! Object speed > 40 km/h", (0, 55),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
                 color = (0,0,255)
+                color_a = (0,0,255)
                 f_color = (0,0,0)
-            # if line_position2 <= previous_centers[classid][1] <= line_position3 and \
-            # speed_in_km_per_hour > 25:
-            #     # easygui.msgbox("Speed Alert in zone 50 : %s km/h" % speed_in_km_per_hour)
-            #     cv2.putText(frame, "ALERT! Object speed > 25 km/h", (0, 55),
-            #     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            #     color = (0,0,255)
+            if line_position2 <= previous_centers[classid][1] <= line_position3 and \
+            speed_in_km_per_hour > 30:
+                # easygui.msgbox("Speed Alert in zone 50 : %s km/h" % speed_in_km_per_hour)
+                cv2.putText(frame, "ALERT! Object speed > 25 km/h", (0, 55),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                color = (0,0,255)
         
-        
+        cv2.arrowedLine(frame, arrow_start, arrow_end, (color_a), 4)
         previous_centers[classid] = center
         cv2.rectangle(frame, box, color, 2)
         # Get label size
