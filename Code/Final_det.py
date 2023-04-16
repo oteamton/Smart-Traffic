@@ -38,7 +38,7 @@ while True:
     line_position2 = int(frame.shape[0] / 2)
     cv2.line(frame, (0, line_position2), (frame.shape[1], line_position2), (0, 255, 255), 2)
     #nearest red
-    line_position3 = int(frame.shape[0] / 1.50)
+    line_position3 = int(frame.shape[0] / 1.35)
     cv2.line(frame, (0, line_position3), (frame.shape[1], line_position3), (0, 0, 255), 2)
     # area = (int(frame.shape[0] / 0.5) - int(frame.shape[0] / 0.1)) * frame.shape[1]
     vertices = np.array([[(0, line_position1), (frame.shape[1], line_position1),
@@ -88,14 +88,14 @@ while True:
                 color = (0,0,255)
                 color_a = (0,0,255)
                 f_color = (0,0,0)
-            # if line_position2 <= previous_centers[classid][1] <= line_position3 and \
-            # speed_in_km_per_hour > 30:
-            #     # easygui.msgbox("Speed Alert in zone 50 : %s km/h" % speed_in_km_per_hour)
-            #     cv2.putText(frame, "ALERT! Object speed > 25 km/h", (0, 55),
-            #     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            #     color = (255,255,255)
-            #     color_a = (0,255,255)
-            #     f_color = (1,1,1)
+            if line_position2 <= previous_centers[classid][1] <= line_position3 and \
+            speed_in_km_per_hour > 30:
+                # easygui.msgbox("Speed Alert in zone 50 : %s km/h" % speed_in_km_per_hour)
+                cv2.putText(frame, "ALERT! Object speed > 25 km/h", (0, 55),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                color = (255,255,255)
+                color_a = (0,255,255)
+                f_color = (1,1,1)
         
         cv2.arrowedLine(frame, arrow_start, arrow_end, (color_a), 4)
         previous_centers[classid] = center
